@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -8,9 +9,11 @@ import '../data/board_categories.dart';
 import '../models/day_record.dart';
 import '../providers/board_provider.dart';
 import '../services/date_keys.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
-/// Board — 오늘(또는 지정 날짜) 무드 보드. 9칸을 카메라/갤러리 이미지로 채운다.
-/// 빈 칸 탭→추가, 채운 칸 탭→교체/삭제. 마감되면 이미지만 잠금(제목·하트는 허용).
+/// Board — SSOT 번역. 제목(편집)/날짜/N images/하트 + 3×3 셀 + 이미지 추가.
+/// 절대좌표는 SSOT(393×852, 풀프레임) 기준. 셀/제목/하트 로직 불변.
 class BoardScreen extends StatefulWidget {
   const BoardScreen({super.key, this.dateKey});
 
@@ -99,6 +102,21 @@ class _BoardScreenState extends State<BoardScreen> {
     }
   }
 
+  Future<void> _addFirstEmpty(DayRecord record) async {
+    if (record.finalized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('마감된 보드는 이미지를 추가할 수 없어요.')),
+      );
+      return;
+    }
+    final empty = kBoardCategories
+        .where((c) => record.cells[c.id] == null)
+        .map((c) => c.id)
+        .toList();
+    if (empty.isEmpty) return;
+    await _pickInto(empty.first);
+  }
+
   Future<void> _editTitle(DayRecord record) async {
     final board = context.read<BoardProvider>();
     final controller = TextEditingController(text: record.moodTitle);
@@ -128,119 +146,139 @@ class _BoardScreenState extends State<BoardScreen> {
   Widget build(BuildContext context) {
     final record = context.watch<BoardProvider>().recordOn(_key);
     if (record == null) {
-      return const SafeArea(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              '아직 오늘 무드를 안 뽑았어요.\nSelect 탭에서 무드를 뽑아 보드를 시작하세요.',
-              textAlign: TextAlign.center,
-            ),
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 40),
+          child: Text(
+            '아직 오늘 무드를 안 뽑았어요.\nSelect 탭에서 무드를 뽑아 보드를 시작하세요.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.caption,
           ),
         ),
       );
     }
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 56, 16, 100),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Stack(
+      children: [
+        // 제목 블록 (SSOT top 146)
+        Positioned(left: 20, top: 146, width: 353, child: _title(record)),
+        // 3×3 그리드 (SSOT top 231)
+        Positioned(left: 20, top: 231, child: _grid(record)),
+        // 이미지 추가 (SSOT top 623)
+        Positioned(left: 20, top: 623, child: _addButton(record)),
+      ],
+    );
+  }
+
+  Widget _title(DayRecord record) {
+    final date = record.dateKey.replaceAll('-', '.');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              record.moodTitle,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit, size: 18),
-                            onPressed: () => _editTitle(record),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '${record.dateKey}${record.finalized ? ' · 마감됨' : ''}',
-                        style: const TextStyle(color: Colors.black54),
-                      ),
-                      Text('${record.filledCount}/${DayRecord.cellCount} images'),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    record.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  ),
-                  color: record.isFavorite ? Colors.red : null,
-                  onPressed: () =>
-                      context.read<BoardProvider>().toggleFavorite(record.dateKey),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 3,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                children: [
-                  for (final category in kBoardCategories)
-                    _Cell(
-                      label: category.labelEn,
-                      path: record.cells[category.id],
-                      onTap: () => _onCellTap(record, category.id),
+              child: GestureDetector(
+                onTap: () => _editTitle(record),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        record.moodTitle,
+                        style: AppTextStyles.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                ],
+                    const SizedBox(width: 15),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 1),
+                      child: Opacity(
+                        opacity: 0.7,
+                        child: SvgPicture.asset(
+                          'assets/images/icons/pen.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              record.finalized ? '마감된 보드' : '빈 칸을 탭해 이미지를 추가하세요',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.black45, fontSize: 12),
+            GestureDetector(
+              onTap: () =>
+                  context.read<BoardProvider>().toggleFavorite(record.dateKey),
+              child: SvgPicture.asset(
+                'assets/images/icons/heart.svg',
+                width: 24,
+                height: 24,
+                colorFilter: record.isFavorite
+                    ? null // 자연색 #1C274C (즐겨찾기)
+                    : const ColorFilter.mode(AppColors.lineSoft, BlendMode.srcIn),
+              ),
             ),
           ],
         ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Text(date, style: AppTextStyles.caption),
+            const SizedBox(width: 8),
+            const Text('|', style: AppTextStyles.caption),
+            const SizedBox(width: 8),
+            Text('${record.filledCount} images', style: AppTextStyles.caption),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _grid(DayRecord record) {
+    return SizedBox(
+      width: 353,
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 13,
+        children: [
+          for (final category in kBoardCategories)
+            _cell(record, category.id, category.labelEn),
+        ],
       ),
     );
   }
-}
 
-class _Cell extends StatelessWidget {
-  const _Cell({required this.label, required this.path, required this.onTap});
+  Widget _cell(DayRecord record, String categoryId, String label) {
+    final path = record.cells[categoryId];
+    return GestureDetector(
+      onTap: () => _onCellTap(record, categoryId),
+      child: SizedBox(
+        width: 111,
+        height: 111,
+        child: path != null
+            ? Image.file(File(path), fit: BoxFit.cover)
+            : ColoredBox(
+                color: AppColors.card,
+                child: Center(child: Text(label, style: AppTextStyles.category)),
+              ),
+      ),
+    );
+  }
 
-  final String label;
-  final String? path;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          color: const Color(0xFFEDEDED),
-          child: path != null
-              ? Image.file(File(path!), fit: BoxFit.cover)
-              : Center(
-                  child: Text(
-                    label,
-                    style: const TextStyle(color: Colors.black45),
-                  ),
-                ),
+  Widget _addButton(DayRecord record) {
+    return GestureDetector(
+      onTap: () => _addFirstEmpty(record),
+      child: Container(
+        width: 353,
+        height: 44,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(8),
         ),
+        child: Text('이미지 추가', style: AppTextStyles.tab),
       ),
     );
   }
