@@ -35,13 +35,17 @@ class SelectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gender = context.watch<ProfileProvider>().profile?.gender ?? 'girl';
+    final canDraw = context.watch<CoinProvider>().canDraw;
     return Stack(
       children: [
-        // Pick Your Fit (SSOT top 154)
-        const Positioned(
+        // Pick Your Fit / 뽑기 완료 안내 (SSOT top 154)
+        Positioned(
           left: 20,
           top: 154,
-          child: Text('Pick Your Fit', style: AppTextStyles.eyebrow),
+          child: Text(
+            canDraw ? 'Pick Your Fit' : '오늘은 이미 뽑았어요 · 내일 다시',
+            style: AppTextStyles.eyebrow,
+          ),
         ),
         // 자판기 완성 이미지 (SSOT top 177)
         Positioned(

@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/board_categories.dart';
 import '../models/day_record.dart';
@@ -55,9 +57,41 @@ class _BoardScreenState extends State<BoardScreen> {
     final board = context.read<BoardProvider>();
     final source = await _askSource();
     if (source == null) return;
-    final XFile? file = await ImagePicker().pickImage(source: source);
-    if (file == null) return;
-    await board.setCellImage(_key, categoryId, file.path);
+    try {
+      final XFile? file = await ImagePicker().pickImage(source: source);
+      if (file == null) return;
+      await board.setCellImage(_key, categoryId, file.path);
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code == 'camera_access_denied' || e.code == 'photo_access_denied') {
+        await _showPermissionDialog(source);
+      }
+    }
+  }
+
+  /// 권한 거부 안내 + 설정 유도.
+  Future<void> _showPermissionDialog(ImageSource source) async {
+    final what = source == ImageSource.camera ? '카메라' : '사진';
+    final open = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('$what 접근 권한 필요'),
+        content: Text('$what 접근이 거부되어 있어요.\n설정 > FITZY에서 권한을 허용해 주세요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('닫기'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('설정 열기'),
+          ),
+        ],
+      ),
+    );
+    if (open == true) {
+      await launchUrl(Uri.parse('app-settings:'));
+    }
   }
 
   Future<void> _editFilled(String categoryId) async {
@@ -159,14 +193,17 @@ class _BoardScreenState extends State<BoardScreen> {
         ),
       );
     }
+    // 기기 폭에 맞춰 셀 크기 산출(좌우 20 패딩, 가로 간격 10×2).
+    final contentW = MediaQuery.of(context).size.width - 40;
+    final cell = (contentW - 20) / 3;
     return Stack(
       children: [
         // 제목 블록 (SSOT top 146)
-        Positioned(left: 20, top: 146, width: 353, child: _title(record)),
+        Positioned(left: 20, right: 20, top: 146, child: _title(record)),
         // 3×3 그리드 (SSOT top 231)
-        Positioned(left: 20, top: 231, child: _grid(record)),
+        Positioned(left: 20, top: 231, child: _grid(record, contentW, cell)),
         // 이미지 추가 (SSOT top 623)
-        Positioned(left: 20, top: 623, child: _addButton(record)),
+        Positioned(left: 20, right: 20, top: 623, child: _addButton(record)),
       ],
     );
   }
@@ -237,27 +274,27 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  Widget _grid(DayRecord record) {
+  Widget _grid(DayRecord record, double width, double cell) {
     return SizedBox(
-      width: 353,
+      width: width,
       child: Wrap(
         spacing: 10,
         runSpacing: 13,
         children: [
           for (final category in kBoardCategories)
-            _cell(record, category.id, category.labelEn),
+            _cell(record, category.id, category.labelEn, cell),
         ],
       ),
     );
   }
 
-  Widget _cell(DayRecord record, String categoryId, String label) {
+  Widget _cell(DayRecord record, String categoryId, String label, double size) {
     final path = record.cells[categoryId];
     return GestureDetector(
       onTap: () => _onCellTap(record, categoryId),
       child: Container(
-        width: 111,
-        height: 111,
+        width: size,
+        height: size,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: AppColors.card,
@@ -269,8 +306,8 @@ class _BoardScreenState extends State<BoardScreen> {
                     !(MediaQuery.maybeOf(context)?.disableAnimations ?? false),
                 child: Image.file(
                   File(context.read<ImageStoreService>().resolve(path)),
-                  width: 111,
-                  height: 111,
+                  width: size,
+                  height: size,
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) =>
                       Center(child: Text(label, style: AppTextStyles.category)),
@@ -287,7 +324,7 @@ class _BoardScreenState extends State<BoardScreen> {
     return GestureDetector(
       onTap: () => _addFirstEmpty(record),
       child: Container(
-        width: 353,
+        width: double.infinity,
         height: 44,
         alignment: Alignment.center,
         decoration: BoxDecoration(
