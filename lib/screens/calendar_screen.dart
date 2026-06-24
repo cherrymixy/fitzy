@@ -86,23 +86,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Stack(
       children: [
-        // 월 헤더 (SSOT left 118, top 146)
+        // 월 헤더 (중앙정렬, 좌/우 이동 버튼)
         Positioned(
-          left: 118,
+          left: 0,
+          right: 0,
           top: 146,
-          child: Row(
-            children: [
-              Text(monthPrefix, style: AppTextStyles.calendarMonth),
-              const SizedBox(width: 23),
-              GestureDetector(
-                onTap: () => _shiftMonth(1),
-                child: SvgPicture.asset(
-                  'assets/images/icons/arrow-right.svg',
-                  width: 24,
-                  height: 24,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () => _shiftMonth(-1),
+                  child: SvgPicture.asset(
+                    'assets/images/icons/arrow-left.svg',
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 20),
+                Text(monthPrefix, style: AppTextStyles.calendarMonth),
+                const SizedBox(width: 20),
+                GestureDetector(
+                  onTap: () => _shiftMonth(1),
+                  child: SvgPicture.asset(
+                    'assets/images/icons/arrow-right.svg',
+                    width: 24,
+                    height: 24,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         // 요일 (SSOT left 28, top 187, width 337)
@@ -278,7 +291,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _summaryBlock(String label, Widget value) {
     return Padding(
       padding: const EdgeInsets.only(left: 22),
-      child: Center(
+      child: Align(
+        alignment: Alignment.centerLeft,
         child: SizedBox(
           height: 55,
           child: Column(
