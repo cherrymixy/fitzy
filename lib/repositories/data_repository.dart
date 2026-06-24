@@ -20,6 +20,9 @@ abstract class DataRepository {
   Future<bool?> loadLoggedIn();
   Future<void> saveLoggedIn(bool value);
 
+  /// 전체 데이터 삭제(설정 > 데이터 초기화). 프로필·코인·기록·로그인 상태 제거.
+  Future<void> clearAll();
+
   // --- Coin ---
   /// 없으면 기본값 const CoinState() 반환(미지급 상태).
   Future<CoinState> loadCoinState();

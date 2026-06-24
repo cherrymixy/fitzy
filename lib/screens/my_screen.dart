@@ -9,16 +9,15 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/local_image.dart';
 import '../widgets/profile_edit_sheet.dart';
+import 'menu_pages.dart';
 
 /// My — SSOT 번역. 프로필 원/편집 버튼/닉네임·메타/태그/구분선/메뉴 리스트.
 /// 절대좌표는 SSOT(393×852, 풀프레임) 기준. 데이터는 ProfileProvider.
 class MyScreen extends StatelessWidget {
   const MyScreen({super.key});
 
-  void _soon(BuildContext context, String label) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label — 준비 중')),
-    );
+  void _push(BuildContext context, Widget page) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
   }
 
   @override
@@ -92,11 +91,14 @@ class MyScreen extends StatelessWidget {
           width: 353,
           child: Column(
             children: [
-              _menuRow(context, '설정'),
+              _menuRow(context, '설정',
+                  () => _push(context, const SettingsPage())),
               const SizedBox(height: 21),
-              _menuRow(context, '공지사항'),
+              _menuRow(context, '공지사항',
+                  () => _push(context, const NoticesPage())),
               const SizedBox(height: 21),
-              _menuRow(context, '고객센터'),
+              _menuRow(context, '고객센터',
+                  () => _push(context, const SupportPage())),
               const SizedBox(height: 21),
               _logoutRow(context),
             ],
@@ -174,10 +176,10 @@ class MyScreen extends StatelessWidget {
     );
   }
 
-  Widget _menuRow(BuildContext context, String label) {
+  Widget _menuRow(BuildContext context, String label, VoidCallback onTap) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => _soon(context, label),
+      onTap: onTap,
       child: SizedBox(
         height: 27,
         child: Row(

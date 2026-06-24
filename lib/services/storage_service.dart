@@ -51,6 +51,14 @@ class StorageService implements DataRepository {
     await _prefs.setBool(_kLoggedIn, value);
   }
 
+  @override
+  Future<void> clearAll() async {
+    await _prefs.remove(_kProfile);
+    await _prefs.remove(_kCoin);
+    await _prefs.remove(_kRecords);
+    await _prefs.remove(_kLoggedIn);
+  }
+
   // --- Coin ---
   @override
   Future<CoinState> loadCoinState() async {

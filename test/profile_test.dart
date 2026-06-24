@@ -149,4 +149,25 @@ void main() {
     expect(reloaded!.nickname, '체리2');
     expect(reloaded.tags, ['미니멀', '시크']);
   });
+
+  test('데이터 초기화: 프로필/로그인 비움', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final prefs = await SharedPreferences.getInstance();
+    final repo = StorageService(prefs);
+    final provider = ProfileProvider(repo);
+    await provider.load();
+    await provider.createProfile(
+      userId: 'cherry',
+      password: 'pw123456',
+      nickname: '체리',
+      gender: 'girl',
+    );
+    expect(provider.loggedIn, isTrue);
+
+    await provider.eraseAllData();
+    expect(provider.profile, isNull);
+    expect(provider.loggedIn, isFalse);
+    expect(await repo.loadProfile(), isNull);
+    expect(await repo.loadLoggedIn(), isNull);
+  });
 }

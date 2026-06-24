@@ -44,6 +44,15 @@ class ProfileProvider extends ChangeNotifier {
   /// 로그아웃 — 프로필은 유지(다시 로그인 가능), 게이트만 인증 플로우로.
   Future<void> logout() => _setLoggedIn(false);
 
+  /// 전체 데이터 초기화(설정) — 저장소를 비우고 로그아웃 상태로.
+  /// 코인/보드 프로바이더는 각자 reset()으로 재로드 필요.
+  Future<void> eraseAllData() async {
+    await _repo.clearAll();
+    _profile = null;
+    _loggedIn = false;
+    notifyListeners();
+  }
+
   /// 가입된 아이디(찾기 화면 표시용). 없으면 null.
   String? get registeredUserId => _profile?.userId;
 

@@ -22,6 +22,12 @@ class CoinProvider extends ChangeNotifier {
   /// 진입 시 refreshDaily가 load 완료를 await하게 해 stale 덮어쓰기(경쟁)를 막는다.
   Future<void> load() => _loading ??= _load();
 
+  /// 데이터 초기화용 — 멱등 가드를 풀고 저장소에서 다시 읽는다.
+  Future<void> reset() {
+    _loading = null;
+    return load();
+  }
+
   Future<void> _load() async {
     _coin = await _repo.loadCoinState();
     notifyListeners();
