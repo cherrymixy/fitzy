@@ -23,8 +23,14 @@ class AppColors {
   /// 강조 — 선택된 탭/액티브 (bg-[#454545]).
   static const Color accent = Color(0xFF454545);
 
-  /// 보더 — 카드/버튼 (border-[#eee]).
+  /// 보더 — 카드/버튼 (border-[#eee], CSS --line).
   static const Color border = Color(0xFFEEEEEE);
+
+  /// 비활성 — 네비 비활성 아이콘 (CSS --muted #848484).
+  static const Color muted = Color(0xFF848484);
+
+  /// 옅은 보더 — 키패드/트레이 디테일 (#dddddd).
+  static const Color lineSoft = Color(0xFFDDDDDD);
 
   /// Figma 변수 "Labels/Primary" — 강한 텍스트/아이콘.
   static const Color labelPrimary = Color(0xFF000000);

@@ -3,14 +3,16 @@ import 'package:provider/provider.dart';
 
 import '../providers/board_provider.dart';
 import '../providers/coin_provider.dart';
-import '../widgets/coin_chip.dart';
+import '../theme/app_colors.dart';
+import '../widgets/fitzy_header.dart';
+import '../widgets/floating_nav.dart';
 import 'board_screen.dart';
 import 'calendar_screen.dart';
 import 'my_screen.dart';
 import 'select_screen.dart';
 
-/// 로그인 후 공통 셸: 상단 FITZY 워드마크+코인 칩, 하단 4탭.
-/// 진입 시 코인 일일 지급(refreshDaily)과 과거 보드 마감(finalizePastRecords)을 돌린다.
+/// 로그인 후 공통 셸 (SSOT shell): 상단 좌측 로고 + 우측 코인 칩, 하단 떠 있는 네비.
+/// 진입 시 코인 일일 지급(refreshDaily)·과거 보드 마감(finalizePastRecords).
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -36,52 +38,39 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'FITZY',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: IndexedStack(
+                index: _index,
+                children: [
+                  SelectScreen(onDrawn: () => _select(1)),
+                  const BoardScreen(),
+                  const CalendarScreen(),
+                  const MyScreen(),
+                ],
+              ),
+            ),
+            // 공통 헤더 (SSOT logo top 70 - 상태바 54 = 16)
+            const Positioned(
+              top: 16,
+              left: 20,
+              right: 20,
+              child: FitzyHeader(),
+            ),
+            // 떠 있는 네비 (SSOT bottom 33)
+            Positioned(
+              bottom: 33,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: FloatingNav(currentIndex: _index, onTap: _select),
+              ),
+            ),
+          ],
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Center(child: CoinChip()),
-          ),
-        ],
-      ),
-      body: IndexedStack(
-        index: _index,
-        children: [
-          SelectScreen(onDrawn: () => _select(1)),
-          const BoardScreen(),
-          const CalendarScreen(),
-          const MyScreen(),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: _select,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.casino_outlined),
-            selectedIcon: Icon(Icons.casino),
-            label: 'Select',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.grid_view_outlined),
-            selectedIcon: Icon(Icons.grid_view),
-            label: 'Board',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
-            label: 'Calendar',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'My',
-          ),
-        ],
       ),
     );
   }

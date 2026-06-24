@@ -66,4 +66,48 @@ class AppTextStyles {
     letterSpacing: 0,
     color: AppColors.text,
   );
+
+  /// 아이브로우 "Pick Your Fit" (Regular 12 / 1.4 / 0).
+  static const TextStyle eyebrow = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    letterSpacing: 0,
+    color: AppColors.text,
+  );
+
+  /// 자판기 패널 라벨 INSERT/RETURN (Medium 10 / 1.25 / 0.08).
+  static const TextStyle panelTitle = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 10,
+    fontWeight: FontWeight.w500,
+    height: 1.25,
+    letterSpacing: 0.08,
+    color: AppColors.text,
+  );
+
+  /// 키패드 키 (Medium 11 / 1).
+  static const TextStyle keyLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    height: 1.0,
+    letterSpacing: 0,
+    color: AppColors.text,
+  );
+
+  /// 자판기 슬롯 라벨 A1~C3 (Bold 13 / 1, 흰 배경 위).
+  static const TextStyle fitLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    height: 1.0,
+    letterSpacing: 0,
+    color: AppColors.text,
+  );
 }

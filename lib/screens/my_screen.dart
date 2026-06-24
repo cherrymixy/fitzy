@@ -19,7 +19,7 @@ class MyScreen extends StatelessWidget {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 56, 16, 100),
         children: [
           Row(
             children: [
