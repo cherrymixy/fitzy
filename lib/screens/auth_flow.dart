@@ -1,11 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../data/legal_text.dart';
 import '../providers/profile_provider.dart';
 import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/legal_sheet.dart';
 import '../widgets/local_image.dart';
 
 /// 인증 플로우(Codex SSOT-2): start → 온보딩 4 → 회원가입 6 → 계정 만들기, + 로그인.
@@ -43,6 +46,8 @@ class _AuthFlowState extends State<AuthFlow> {
   final _loginId = TextEditingController();
   final _loginPw = TextEditingController();
   final _newPw = TextEditingController();
+  late final TapGestureRecognizer _termsTap;
+  late final TapGestureRecognizer _privacyTap;
 
   bool _agreedTerms = false;
   String? _gender; // 'boy' | 'girl'
@@ -50,6 +55,15 @@ class _AuthFlowState extends State<AuthFlow> {
   String? _imagePath;
   bool _submitting = false;
   bool _forward = true; // 전환 방향(다음=오른쪽에서, 뒤로=왼쪽에서)
+
+  @override
+  void initState() {
+    super.initState();
+    _termsTap = TapGestureRecognizer()
+      ..onTap = () => showLegalSheet(context, '서비스 이용약관', kTermsOfService);
+    _privacyTap = TapGestureRecognizer()
+      ..onTap = () => showLegalSheet(context, '개인정보 취급방침', kPrivacyPolicy);
+  }
 
   @override
   void dispose() {
@@ -60,6 +74,8 @@ class _AuthFlowState extends State<AuthFlow> {
     _loginId.dispose();
     _loginPw.dispose();
     _newPw.dispose();
+    _termsTap.dispose();
+    _privacyTap.dispose();
     super.dispose();
   }
 
@@ -363,28 +379,66 @@ class _AuthFlowState extends State<AuthFlow> {
     );
   }
 
+  Widget _checkBoxIcon(bool value) => Container(
+        width: 18,
+        height: 18,
+        decoration: BoxDecoration(
+          color: value ? AppColors.text : Colors.transparent,
+          border: Border.all(color: AppColors.graySubtle, width: 1.8),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: value
+            ? const Icon(Icons.check, size: 13, color: Colors.white)
+            : null,
+      );
+
   Widget _checkbox(bool value, VoidCallback onTap, Widget label) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Row(
         children: [
-          Container(
-            width: 18,
-            height: 18,
-            decoration: BoxDecoration(
-              color: value ? AppColors.text : Colors.transparent,
-              border: Border.all(color: AppColors.graySubtle, width: 1.8),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: value
-                ? const Icon(Icons.check, size: 13, color: Colors.white)
-                : null,
-          ),
+          _checkBoxIcon(value),
           const SizedBox(width: 8),
           Flexible(child: label),
         ],
       ),
+    );
+  }
+
+  /// 약관 동의 줄 — 박스 탭은 토글, 밑줄 단어 탭은 문안 시트.
+  Widget _termsRow() {
+    const link = TextStyle(
+      fontWeight: FontWeight.w600,
+      decoration: TextDecoration.underline,
+    );
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _agreedTerms = !_agreedTerms),
+          child: _checkBoxIcon(_agreedTerms),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text.rich(
+            TextSpan(
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppColors.grayBold,
+                height: 1.6,
+              ),
+              children: [
+                TextSpan(
+                    text: '서비스이용약관', style: link, recognizer: _termsTap),
+                const TextSpan(text: '과 '),
+                TextSpan(
+                    text: '개인정보취급방침', style: link, recognizer: _privacyTap),
+                const TextSpan(text: '에 동의합니다.'),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -514,33 +568,7 @@ class _AuthFlowState extends State<AuthFlow> {
         [
           _field(_nick, '닉네임', maxLen: 12),
           const SizedBox(height: 12),
-          _checkbox(
-            _agreedTerms,
-            () => setState(() => _agreedTerms = !_agreedTerms),
-            RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.grayBold,
-                  height: 1.6,
-                ),
-                children: [
-                  TextSpan(
-                      text: '서비스이용약관',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline)),
-                  TextSpan(text: '과 '),
-                  TextSpan(
-                      text: '개인정보취급방침',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline)),
-                  TextSpan(text: '에 동의합니다.'),
-                ],
-              ),
-            ),
-          ),
+          _termsRow(),
         ],
         '다음',
         _next,
