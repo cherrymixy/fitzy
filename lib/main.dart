@@ -18,6 +18,7 @@ Future<void> main() async {
   // 경로 A(로컬). 경로 B 전환 시 이 한 줄만 FirestoreRepository로 교체.
   final DataRepository repository = StorageService(prefs);
   final imageStore = ImageStoreService();
+  await imageStore.init(); // documents 절대경로 캐시(상대경로 표시용)
 
   runApp(FitzyApp(repository: repository, imageStore: imageStore));
 }
@@ -37,6 +38,7 @@ class FitzyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<ImageStoreService>.value(value: imageStore),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(repository)..load(),
         ),

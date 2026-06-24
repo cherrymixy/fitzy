@@ -9,6 +9,7 @@ import '../data/board_categories.dart';
 import '../models/day_record.dart';
 import '../providers/board_provider.dart';
 import '../services/date_keys.dart';
+import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
@@ -263,7 +264,12 @@ class _BoardScreenState extends State<BoardScreen> {
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         child: path != null
-            ? Image.file(File(path), fit: BoxFit.cover)
+            ? Image.file(
+                File(context.read<ImageStoreService>().resolve(path)),
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    Center(child: Text(label, style: AppTextStyles.category)),
+              )
             : Center(child: Text(label, style: AppTextStyles.category)),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../models/user_profile.dart';
 import '../providers/profile_provider.dart';
+import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -31,7 +32,7 @@ class MyScreen extends StatelessWidget {
     return Stack(
       children: [
         // 프로필 원 (SSOT left 111, top 146, 171×171)
-        Positioned(left: 111, top: 146, child: _circle(profile)),
+        Positioned(left: 111, top: 146, child: _circle(context, profile)),
         // 편집 버튼 (SSOT left 240, top 277, 40×40)
         Positioned(left: 240, top: 277, child: _editButton(context)),
         // 닉네임 + 메타 (SSOT left 20, top 342, width 353, 중앙)
@@ -103,7 +104,7 @@ class MyScreen extends StatelessWidget {
     );
   }
 
-  Widget _circle(UserProfile profile) {
+  Widget _circle(BuildContext context, UserProfile profile) {
     return Container(
       width: 171,
       height: 171,
@@ -114,7 +115,8 @@ class MyScreen extends StatelessWidget {
       ),
       child: profile.profileImagePath != null
           ? Image.file(
-              File(profile.profileImagePath!),
+              File(context.read<ImageStoreService>()
+                  .resolve(profile.profileImagePath!)),
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => _avatarFallback(),
             )

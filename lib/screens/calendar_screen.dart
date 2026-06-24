@@ -8,6 +8,7 @@ import '../data/mood_fits.dart';
 import '../models/day_record.dart';
 import '../providers/board_provider.dart';
 import '../services/date_keys.dart';
+import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import 'board_screen.dart';
@@ -229,7 +230,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     borderRadius: BorderRadius.circular(4),
                     child: thumb != null
                         ? Image.file(
-                            File(thumb),
+                            File(context.read<ImageStoreService>().resolve(thumb)),
                             width: 37,
                             height: 37,
                             fit: BoxFit.cover,
