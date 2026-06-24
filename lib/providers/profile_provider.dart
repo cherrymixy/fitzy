@@ -61,6 +61,23 @@ class ProfileProvider extends ChangeNotifier {
     return null;
   }
 
+  /// 프로필 편집(My) — 닉네임/태그/이미지 갱신. 성공 null, 실패 사유.
+  Future<String?> updateProfile({
+    required String nickname,
+    List<String>? tags,
+    String? profileImagePath,
+  }) async {
+    final p = _profile;
+    if (p == null) return '프로필이 없어요.';
+    final e = validateNickname(nickname);
+    if (e != null) return e;
+    p.nickname = nickname.trim();
+    if (tags != null) p.tags = tags;
+    if (profileImagePath != null) p.profileImagePath = profileImagePath;
+    await saveProfile(p);
+    return null;
+  }
+
   /// 프로필 생성/갱신 후 즉시 저장.
   Future<void> saveProfile(UserProfile profile) async {
     _profile = profile;

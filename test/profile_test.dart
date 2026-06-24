@@ -121,4 +121,32 @@ void main() {
     expect(await provider.login('cherry', 'new567890'), isNull);
     expect(provider.loggedIn, isTrue);
   });
+
+  test('프로필 편집: 닉네임/태그 갱신 + 저장 왕복', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final prefs = await SharedPreferences.getInstance();
+    final provider = ProfileProvider(StorageService(prefs));
+    await provider.load();
+    await provider.createProfile(
+      userId: 'cherry',
+      password: 'pw123456',
+      nickname: '체리',
+      gender: 'girl',
+      tags: const ['러블리'],
+    );
+
+    expect(await provider.updateProfile(nickname: ''), isNotNull); // 빈 닉네임
+    final err = await provider.updateProfile(
+      nickname: '체리2',
+      tags: const ['미니멀', '시크'],
+    );
+    expect(err, isNull);
+    expect(provider.profile!.nickname, '체리2');
+    expect(provider.profile!.tags, ['미니멀', '시크']);
+
+    // 영속 확인
+    final reloaded = await StorageService(prefs).loadProfile();
+    expect(reloaded!.nickname, '체리2');
+    expect(reloaded.tags, ['미니멀', '시크']);
+  });
 }

@@ -8,6 +8,7 @@ import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/local_image.dart';
+import '../widgets/profile_edit_sheet.dart';
 
 /// My — SSOT 번역. 프로필 원/편집 버튼/닉네임·메타/태그/구분선/메뉴 리스트.
 /// 절대좌표는 SSOT(393×852, 풀프레임) 기준. 데이터는 ProfileProvider.
@@ -141,7 +142,7 @@ class MyScreen extends StatelessWidget {
 
   Widget _editButton(BuildContext context) {
     return GestureDetector(
-      onTap: () => _soon(context, '프로필 편집'),
+      onTap: () => showProfileEditSheet(context),
       child: Container(
         width: 40,
         height: 40,
