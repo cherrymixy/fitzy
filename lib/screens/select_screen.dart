@@ -76,7 +76,8 @@ class SelectScreen extends StatelessWidget {
 
   Widget _machine(BuildContext context, String gender) {
     return SizedBox(
-      width: 280,
+      // 폭은 크롭된 자판기 비율(≈0.4637)에 맞춰 좌측(20)에 꽉 차게 — 로고와 정렬.
+      width: 260,
       height: 560,
       child: Stack(
         children: [
