@@ -13,8 +13,8 @@ import '../services/image_store_service.dart';
 /// ImageStoreService에도 의존한다 — 파일 생애주기가 보드의 본질 기능이라
 /// 불가피(구체 저장소가 아닌 서비스 의존).
 ///
-/// 마감(finalized) 트리거는 STEP 6에서. 여기서는 마감된 보드의 '이미지
-/// 추가/수정만' 막는 가드만 둔다(제목·즐겨찾기는 마감 후에도 허용).
+/// 자정 마감(finalize): [finalizePastRecords]로 과거 보드를 잠근다(이미지
+/// 추가/수정만 불가, 제목·즐겨찾기는 마감 후에도 허용).
 class BoardProvider extends ChangeNotifier {
   BoardProvider(this._repo, this._imageStore);
 
@@ -25,6 +25,10 @@ class BoardProvider extends ChangeNotifier {
 
   List<DayRecord> get all => _records.values.toList();
   DayRecord? recordOn(String dateKey) => _records[dateKey];
+
+  /// 완성(9/9) 보드만 — 캘린더는 완성 보드만 노출(PRD §7-5).
+  List<DayRecord> get completedRecords =>
+      _records.values.where((r) => r.isComplete).toList();
 
   Future<void> load() async {
     final list = await _repo.loadAllDayRecords();
@@ -122,5 +126,22 @@ class BoardProvider extends ChangeNotifier {
     record.updatedAt = DateTime.now();
     await _repo.saveDayRecord(record);
     notifyListeners();
+  }
+
+  /// 자정 경계 마감. 오늘이 아닌(과거) 보드를 finalize한다.
+  /// 마감되면 이미지 추가/수정 불가(제목·즐겨찾기는 계속 허용).
+  /// 진입 시 호출(now 주입). 화면 배선은 STEP 7.
+  Future<void> finalizePastRecords(DateTime now) async {
+    final today = dateKeyOf(now);
+    var changed = false;
+    for (final record in _records.values) {
+      if (record.dateKey != today && !record.finalized) {
+        record.finalized = true;
+        record.updatedAt = now;
+        await _repo.saveDayRecord(record);
+        changed = true;
+      }
+    }
+    if (changed) notifyListeners();
   }
 }
