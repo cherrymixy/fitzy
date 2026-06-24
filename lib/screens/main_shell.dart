@@ -60,9 +60,9 @@ class _MainShellState extends State<MainShell> {
             right: 20,
             child: FitzyHeader(),
           ),
-          // 떠 있는 네비 (SSOT bottom 33)
+          // 떠 있는 네비 (살짝 크게 + 더 아래로)
           Positioned(
-            bottom: 33,
+            bottom: 20,
             left: 0,
             right: 0,
             child: Center(

@@ -8,17 +8,13 @@ import '../providers/profile_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
-/// Select(Pick Your Fit) — SSOT 자판기 번역.
-/// 절대좌표는 SSOT(393×852, 상태바 54) 기준에서 (y-54)로 SafeArea에 매핑.
-/// 슬롯 탭 = 뽑기(코인 소모→무드 확정→Board). 로직 불변.
+/// Select(Pick Your Fit) — SSOT 번역.
+/// 자판기는 성별별 완성 이미지(moods/{gender}/full.png) 한 장으로 표시하고,
+/// 3×3 투명 탭존으로 무드 픽(코인 소모→무드 확정→Board). 로직 불변.
 class SelectScreen extends StatelessWidget {
   const SelectScreen({super.key, required this.onDrawn});
 
   final VoidCallback onDrawn;
-
-  static const List<String> _cols = ['A', 'B', 'C'];
-  static const List<double> _slotLeft = [1, 90, 177];
-  static const List<double> _slotTop = [10, 190, 372];
 
   Future<void> _draw(BuildContext context, String moodId) async {
     final coin = context.read<CoinProvider>();
@@ -40,7 +36,6 @@ class SelectScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final gender = context.watch<ProfileProvider>().profile?.gender ?? 'girl';
     return Stack(
-      clipBehavior: Clip.none,
       children: [
         // Pick Your Fit (SSOT top 154)
         const Positioned(
@@ -48,7 +43,7 @@ class SelectScreen extends StatelessWidget {
           top: 154,
           child: Text('Pick Your Fit', style: AppTextStyles.eyebrow),
         ),
-        // 자판기 (SSOT top 177)
+        // 자판기 완성 이미지 (SSOT top 177)
         Positioned(
           left: 20,
           top: 177,
@@ -66,83 +61,39 @@ class SelectScreen extends StatelessWidget {
 
   Widget _machine(BuildContext context, String gender) {
     return SizedBox(
-      width: 259,
+      width: 280,
       height: 560,
       child: Stack(
-        clipBehavior: Clip.none,
         children: [
           Positioned.fill(
-            child: Image.asset('assets/images/vending/back.png', fit: BoxFit.fill),
+            child: Image.asset(
+              'assets/images/moods/$gender/full.png',
+              fit: BoxFit.contain,
+            ),
           ),
-          for (var i = 0; i < 9; i++) _slot(context, i, gender),
-        ],
-      ),
-    );
-  }
-
-  Widget _slot(BuildContext context, int i, String gender) {
-    final col = i % 3;
-    final row = i ~/ 3;
-    final mood = kMoodFits[i];
-    final label = '${_cols[row]}${col + 1}';
-    final modelW = col == 0 ? 116.0 : 118.0;
-    final modelH = row == 2 ? 170.0 : 174.0;
-    return Positioned(
-      left: _slotLeft[col],
-      top: _slotTop[row],
-      width: 84,
-      height: 173,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _draw(context, mood.id),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              bottom: 18,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Image.asset(
-                  mood.imageAssetFor(gender),
-                  width: modelW,
-                  height: modelH,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -3,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Image.asset(
-                  'assets/images/vending/pin.png',
-                  width: 55,
-                  height: 55,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 3,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: 37,
-                  height: 22,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(16),
+          // 3×3 투명 탭존 (A1~C3 → 무드)
+          Positioned.fill(
+            child: Column(
+              children: [
+                for (var row = 0; row < 3; row++)
+                  Expanded(
+                    child: Row(
+                      children: [
+                        for (var col = 0; col < 3; col++)
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () =>
+                                  _draw(context, kMoodFits[row * 3 + col].id),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                  child: Text(label, style: AppTextStyles.fitLabel),
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -28,7 +28,7 @@ class FloatingNav extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 8.5, sigmaY: 8.5),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(56),
@@ -41,7 +41,7 @@ class FloatingNav extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               for (var i = 0; i < _items.length; i++) ...[
-                if (i > 0) const SizedBox(width: 20),
+                if (i > 0) const SizedBox(width: 22),
                 _NavItem(
                   icon: _items[i].$1,
                   label: _items[i].$2,
@@ -74,8 +74,8 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final svg = SvgPicture.asset(
       icon,
-      width: 24,
-      height: 24,
+      width: 26,
+      height: 26,
       colorFilter: ColorFilter.mode(
         active ? Colors.white : AppColors.muted,
         BlendMode.srcIn,
@@ -86,8 +86,8 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       child: active
           ? Container(
-              height: 37,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              height: 42,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: AppColors.accent,
                 borderRadius: BorderRadius.circular(56),
@@ -104,7 +104,7 @@ class _NavItem extends StatelessWidget {
                 ],
               ),
             )
-          : SizedBox(height: 37, width: 24, child: Center(child: svg)),
+          : SizedBox(height: 42, width: 26, child: Center(child: svg)),
     );
   }
 }
