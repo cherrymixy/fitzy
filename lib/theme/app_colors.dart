@@ -32,6 +32,9 @@ class AppColors {
   /// 옅은 보더 — 키패드/트레이 디테일 (#dddddd).
   static const Color lineSoft = Color(0xFFDDDDDD);
 
+  /// 썸네일 플레이스홀더 — 캘린더 기록 마크 (#d9d9d9).
+  static const Color thumbPlaceholder = Color(0xFFD9D9D9);
+
   /// Figma 변수 "Labels/Primary" — 강한 텍스트/아이콘.
   static const Color labelPrimary = Color(0xFF000000);
 }

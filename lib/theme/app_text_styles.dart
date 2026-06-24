@@ -110,4 +110,59 @@ class AppTextStyles {
     letterSpacing: 0,
     color: AppColors.text,
   );
+
+  /// 캘린더 월 (SemiBold 16 / 1 / -0.16).
+  static const TextStyle calendarMonth = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.0,
+    letterSpacing: -0.16,
+    color: AppColors.text,
+  );
+
+  /// 요일·날짜 셀 (Medium 11.4 / 1 / -0.114).
+  static const TextStyle weekday = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 11.4,
+    fontWeight: FontWeight.w500,
+    height: 1.0,
+    letterSpacing: -0.114,
+    color: AppColors.text,
+  );
+
+  /// 월 통계 라벨 (Medium 11 / 1.4 / 0.088).
+  static const TextStyle summaryLabel = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    height: 1.4,
+    letterSpacing: 0.088,
+    color: AppColors.text,
+  );
+
+  /// 월 통계 값 (SemiBold 21 / 0.82 / 0.168).
+  static const TextStyle summaryValue = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 21,
+    fontWeight: FontWeight.w600,
+    height: 0.82,
+    letterSpacing: 0.168,
+    color: AppColors.text,
+  );
+
+  /// 월 통계 단위 (Medium 11 / 1).
+  static const TextStyle summaryUnit = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    height: 1.0,
+    letterSpacing: 0,
+    color: AppColors.text,
+  );
 }

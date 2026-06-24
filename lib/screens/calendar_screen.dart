@@ -1,16 +1,19 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../data/mood_fits.dart';
 import '../models/day_record.dart';
 import '../providers/board_provider.dart';
 import '../services/date_keys.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 import 'board_screen.dart';
 
-/// Calendar — 월 그리드. 완성 보드만 날짜에 썸네일, 하단 월 통계.
-/// 날짜 탭 → 그날 보드(읽기 전용 가능).
+/// Calendar — SSOT 번역. 월 헤더 + 요일 + 날짜 그리드(기록일=썸네일) + 월 통계.
+/// 절대좌표는 SSOT(393×852, 풀프레임) 기준. 데이터는 BoardProvider.
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 
@@ -20,6 +23,10 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   late DateTime _month;
+
+  static const List<String> _weekdays = [
+    'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT',
+  ];
 
   @override
   void initState() {
@@ -42,8 +49,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => Scaffold(
-          appBar: AppBar(title: Text(dateKey)),
-          body: BoardScreen(dateKey: dateKey),
+          backgroundColor: AppColors.background,
+          body: Stack(
+            children: [
+              Positioned.fill(child: BoardScreen(dateKey: dateKey)),
+              const Positioned(top: 50, left: 4, child: BackButton()),
+            ],
+          ),
         ),
       ),
     );
@@ -66,171 +78,218 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final completed = <String, DayRecord>{
       for (final r in board.completedRecords) r.dateKey: r,
     };
-
     final monthPrefix =
-        '${_month.year.toString().padLeft(4, '0')}-${_month.month.toString().padLeft(2, '0')}';
+        '${_month.year.toString().padLeft(4, '0')}.${_month.month.toString().padLeft(2, '0')}';
     final monthCompleted = completed.values
-        .where((r) => r.dateKey.startsWith(monthPrefix))
+        .where((r) => r.dateKey.startsWith(monthPrefix.replaceAll('.', '-')))
         .toList();
 
-    final firstWeekday = DateTime(_month.year, _month.month, 1).weekday % 7; // 일=0
+    return Stack(
+      children: [
+        // 월 헤더 (SSOT left 118, top 146)
+        Positioned(
+          left: 118,
+          top: 146,
+          child: Row(
+            children: [
+              Text(monthPrefix, style: AppTextStyles.calendarMonth),
+              const SizedBox(width: 23),
+              GestureDetector(
+                onTap: () => _shiftMonth(1),
+                child: SvgPicture.asset(
+                  'assets/images/icons/arrow-right.svg',
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // 요일 (SSOT left 28, top 187, width 337)
+        Positioned(
+          left: 28,
+          top: 187,
+          width: 337,
+          child: Row(
+            children: [
+              for (final w in _weekdays)
+                Expanded(
+                  child: Center(child: Text(w, style: AppTextStyles.weekday)),
+                ),
+            ],
+          ),
+        ),
+        // 날짜 그리드 (SSOT left 20, top 209) — 좌우 스와이프로 월 이동
+        Positioned(
+          left: 20,
+          top: 209,
+          child: GestureDetector(
+            onHorizontalDragEnd: (d) {
+              final v = d.primaryVelocity ?? 0;
+              if (v > 0) {
+                _shiftMonth(-1);
+              } else if (v < 0) {
+                _shiftMonth(1);
+              }
+            },
+            child: _grid(completed),
+          ),
+        ),
+        // 월 통계 (SSOT left 20, top 663)
+        Positioned(
+          left: 20,
+          top: 663,
+          child: _summary(monthCompleted.length, _topMoodKo(monthCompleted)),
+        ),
+      ],
+    );
+  }
+
+  Widget _grid(Map<String, DayRecord> completed) {
+    final first = DateTime(_month.year, _month.month, 1);
+    final firstWeekday = first.weekday % 7; // 일=0
     final daysInMonth = DateTime(_month.year, _month.month + 1, 0).day;
+    final start = first.subtract(Duration(days: firstWeekday));
+    final rows = ((firstWeekday + daysInMonth + 6) ~/ 7);
 
-    final cells = <Widget>[];
-    for (var i = 0; i < firstWeekday; i++) {
-      cells.add(const SizedBox.shrink());
-    }
-    for (var day = 1; day <= daysInMonth; day++) {
-      final dateKey = dateKeyOf(DateTime(_month.year, _month.month, day));
-      final record = completed[dateKey];
-      cells.add(_DayCell(
-        day: day,
-        thumbPath: record == null ? null : _thumb(record),
-        onTap: () => _openDay(dateKey),
-      ));
-    }
-
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 56, 12, 100),
+    return SizedBox(
+      width: 353,
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  onPressed: () => _shiftMonth(-1),
+            for (var r = 0; r < rows; r++)
+              Container(
+                height: 84,
+                decoration: BoxDecoration(
+                  border: r == rows - 1
+                      ? null
+                      : const Border(bottom: BorderSide(color: AppColors.border)),
                 ),
-                Text(
-                  monthPrefix,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  children: [
+                    for (var c = 0; c < 7; c++)
+                      _dateCell(start.add(Duration(days: r * 7 + c)), completed),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  onPressed: () => _shiftMonth(1),
-                ),
-              ],
-            ),
-            const Row(
-              children: [
-                _Wd('일'), _Wd('월'), _Wd('화'), _Wd('수'), _Wd('목'), _Wd('금'), _Wd('토'),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 7,
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4,
-                children: cells,
               ),
-            ),
-            const Divider(),
-            _Stats(
-              days: monthCompleted.length,
-              topMoodKo: _topMoodKo(monthCompleted),
-            ),
           ],
         ),
       ),
     );
   }
-}
 
-class _Wd extends StatelessWidget {
-  const _Wd(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _dateCell(DateTime date, Map<String, DayRecord> completed) {
+    final inMonth = date.month == _month.month;
+    final key = dateKeyOf(date);
+    final record = completed[key];
+    final thumb = record == null ? null : _thumb(record);
     return Expanded(
-      child: Center(
-        child: Text(
-          label,
-          style: const TextStyle(color: Colors.black54, fontSize: 12),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _openDay(key),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 16,
+              left: 0,
+              right: 0,
+              child: Text(
+                '${date.day}',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.weekday.copyWith(
+                  color: inMonth
+                      ? AppColors.text
+                      : AppColors.text.withValues(alpha: 0.3),
+                ),
+              ),
+            ),
+            if (record != null)
+              Positioned(
+                top: 39,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: thumb != null
+                        ? Image.file(
+                            File(thumb),
+                            width: 37,
+                            height: 37,
+                            fit: BoxFit.cover,
+                          )
+                        : const ColoredBox(
+                            color: AppColors.thumbPlaceholder,
+                            child: SizedBox(width: 37, height: 37),
+                          ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
-}
 
-class _DayCell extends StatelessWidget {
-  const _DayCell({
-    required this.day,
-    required this.thumbPath,
-    required this.onTap,
-  });
-
-  final int day;
-  final String? thumbPath;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Stack(
-        fit: StackFit.expand,
+  Widget _summary(int days, String topMoodKo) {
+    return Container(
+      width: 353,
+      height: 82,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: thumbPath != null
-                ? Image.file(File(thumbPath!), fit: BoxFit.cover)
-                : const ColoredBox(color: Color(0xFFF2F2F2)),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(3),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                '$day',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: thumbPath != null ? Colors.white : Colors.black54,
-                ),
+          Expanded(
+            child: _summaryBlock(
+              '이번 달 기록',
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('$days', style: AppTextStyles.summaryValue),
+                  const SizedBox(width: 4),
+                  const Text('일', style: AppTextStyles.summaryUnit),
+                ],
               ),
+            ),
+          ),
+          const ColoredBox(
+            color: AppColors.border,
+            child: SizedBox(width: 1),
+          ),
+          Expanded(
+            child: _summaryBlock(
+              '가장 많이 기록한 무드',
+              Text(topMoodKo, style: AppTextStyles.summaryValue),
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class _Stats extends StatelessWidget {
-  const _Stats({required this.days, required this.topMoodKo});
-
-  final int days;
-  final String topMoodKo;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _summaryBlock(String label, Widget value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Column(
+      padding: const EdgeInsets.only(left: 22),
+      child: Center(
+        child: SizedBox(
+          height: 55,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('이번 달 기록'),
-              Text('$days일',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(label, style: AppTextStyles.summaryLabel),
+              value,
             ],
           ),
-          Column(
-            children: [
-              const Text('가장 많이 기록한 무드'),
-              Text(topMoodKo,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
