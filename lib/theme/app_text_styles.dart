@@ -165,4 +165,26 @@ class AppTextStyles {
     letterSpacing: 0,
     color: AppColors.text,
   );
+
+  /// My 메뉴 행 (Medium 16 / 1.2).
+  static const TextStyle menuRow = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    height: 1.2,
+    letterSpacing: 0,
+    color: AppColors.text,
+  );
+
+  /// My 태그 칩 (Medium 12).
+  static const TextStyle tag = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: _koFallback,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    height: 1.0,
+    letterSpacing: 0,
+    color: AppColors.text,
+  );
 }

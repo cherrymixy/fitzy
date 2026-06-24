@@ -35,6 +35,12 @@ class AppColors {
   /// 썸네일 플레이스홀더 — 캘린더 기록 마크 (#d9d9d9).
   static const Color thumbPlaceholder = Color(0xFFD9D9D9);
 
+  /// 프로필 편집 버튼 배경 — 어두운 원형 (#383838).
+  static const Color darkButton = Color(0xFF383838);
+
+  /// 굵은 구분선 (My 섹션 divider #f4f4f4).
+  static const Color dividerSoft = Color(0xFFF4F4F4);
+
   /// Figma 변수 "Labels/Primary" — 강한 텍스트/아이콘.
   static const Color labelPrimary = Color(0xFF000000);
 }
