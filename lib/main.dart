@@ -9,6 +9,7 @@ import 'repositories/data_repository.dart';
 import 'screens/root_gate.dart';
 import 'services/image_store_service.dart';
 import 'services/storage_service.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,10 +47,11 @@ class FitzyApp extends StatelessWidget {
           create: (_) => BoardProvider(repository, imageStore)..load(),
         ),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         title: 'FITZY',
         debugShowCheckedModeBanner: false,
-        home: RootGate(),
+        theme: AppTheme.light,
+        home: const RootGate(),
       ),
     );
   }
