@@ -98,6 +98,7 @@ class StorageService implements DataRepository {
   // --- (역)직렬화 ---
   Map<String, dynamic> _profileToMap(UserProfile p) => <String, dynamic>{
         'userId': p.userId,
+        'password': p.password,
         'nickname': p.nickname,
         'gender': p.gender,
         'genderPrivate': p.genderPrivate,
@@ -107,6 +108,7 @@ class StorageService implements DataRepository {
 
   UserProfile _profileFromMap(Map<String, dynamic> m) => UserProfile(
         userId: m['userId'] as String,
+        password: m['password'] as String? ?? '',
         nickname: m['nickname'] as String,
         gender: m['gender'] as String,
         genderPrivate: m['genderPrivate'] as bool? ?? false,

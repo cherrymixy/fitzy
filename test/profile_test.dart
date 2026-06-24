@@ -34,6 +34,7 @@ void main() {
     // 최초 가입 성공
     final error1 = await provider.createProfile(
       userId: 'fitzy_01',
+      password: 'pw123456',
       nickname: '승아',
       gender: 'girl',
     );
@@ -48,6 +49,7 @@ void main() {
     // 같은 아이디 재가입 → 중복 에러
     final error2 = await provider.createProfile(
       userId: 'fitzy_01',
+      password: 'pw123456',
       nickname: '다른',
       gender: 'boy',
     );
@@ -56,6 +58,7 @@ void main() {
     // 성별 미선택 → 에러
     final error3 = await provider.createProfile(
       userId: 'new_user',
+      password: 'pw123456',
       nickname: '닉',
       gender: '',
     );

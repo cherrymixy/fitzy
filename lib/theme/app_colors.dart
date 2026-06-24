@@ -41,6 +41,19 @@ class AppColors {
   /// 굵은 구분선 (My 섹션 divider #f4f4f4).
   static const Color dividerSoft = Color(0xFFF4F4F4);
 
+  // --- 온보딩/회원가입 폼 (Codex SSOT-2) ---
+  /// 폼 강조 텍스트 (#35373c).
+  static const Color grayBold = Color(0xFF35373C);
+
+  /// 폼 보통 텍스트 (#70737e).
+  static const Color grayNormal = Color(0xFF70737E);
+
+  /// 폼 옅은 텍스트·플레이스홀더 (#a4a9b7).
+  static const Color graySubtle = Color(0xFFA4A9B7);
+
+  /// 입력 필드 보더 (#d7d9e0).
+  static const Color borderSubtle = Color(0xFFD7D9E0);
+
   /// Figma 변수 "Labels/Primary" — 강한 텍스트/아이콘.
   static const Color labelPrimary = Color(0xFF000000);
 }

@@ -4,6 +4,9 @@ class UserProfile {
   /// 형식검증 + 로컬 대조만 한다(전역 유니크는 경로 B에서). [[ID 유니크 추상화]]
   final String userId;
 
+  /// 로그인 패스워드(경로 A 로컬 — 기기 내 저장, 네트워크 전송 없음).
+  String password;
+
   /// 표시 닉네임(편집 가능).
   String nickname;
 
@@ -24,6 +27,7 @@ class UserProfile {
     required this.userId,
     required this.nickname,
     required this.gender,
+    this.password = '',
     this.genderPrivate = false,
     this.tags = const <String>[],
     this.profileImagePath,

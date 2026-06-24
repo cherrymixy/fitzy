@@ -81,6 +81,7 @@ void main() {
     // 온보딩→프로필 저장
     final err = await w.profile.createProfile(
       userId: 'cherry',
+      password: 'pw123456',
       nickname: '체리',
       gender: 'girl',
       tags: const ['러블리'],
