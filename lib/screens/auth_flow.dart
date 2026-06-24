@@ -47,6 +47,7 @@ class _AuthFlowState extends State<AuthFlow> {
   bool _genderPrivate = false;
   String? _imagePath;
   bool _submitting = false;
+  bool _forward = true; // 전환 방향(다음=오른쪽에서, 뒤로=왼쪽에서)
 
   @override
   void dispose() {
@@ -59,7 +60,10 @@ class _AuthFlowState extends State<AuthFlow> {
     super.dispose();
   }
 
-  void _go(_Step s) => setState(() => _step = s);
+  void _go(_Step s, {bool forward = true}) => setState(() {
+        _forward = forward;
+        _step = s;
+      });
 
   void _toast(String msg) => ScaffoldMessenger.of(context)
       .showSnackBar(SnackBar(content: Text(msg)));
@@ -79,7 +83,7 @@ class _AuthFlowState extends State<AuthFlow> {
       _Step.login: _Step.start,
     };
     final p = prev[_step];
-    if (p != null) _go(p);
+    if (p != null) _go(p, forward: false);
   }
 
   Future<void> _checkId() async {
@@ -180,7 +184,29 @@ class _AuthFlowState extends State<AuthFlow> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: switch (_step) {
+      body: AnimatedSwitcher(
+        duration: (MediaQuery.maybeOf(context)?.disableAnimations ?? false)
+            ? Duration.zero
+            : const Duration(milliseconds: 280),
+        switchInCurve: Curves.easeOutCubic,
+        transitionBuilder: (child, anim) {
+          if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) {
+            return child;
+          }
+          return FadeTransition(
+            opacity: anim,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(_forward ? 0.10 : -0.10, 0),
+                end: Offset.zero,
+              ).animate(anim),
+              child: child,
+            ),
+          );
+        },
+        child: KeyedSubtree(
+          key: ValueKey(_step),
+          child: switch (_step) {
         _Step.start => _start(),
         _Step.onb1 => _onboarding(
             0.25, '하루에 하나,\n코인을 받을 수 있어요.', '다음', false),
@@ -197,7 +223,9 @@ class _AuthFlowState extends State<AuthFlow> {
         _Step.suTags => _suTags(),
         _Step.suImage => _suImage(),
         _Step.login => _login(),
-      },
+          },
+        ),
+      ),
     );
   }
 
