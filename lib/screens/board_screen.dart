@@ -10,6 +10,7 @@ import '../models/day_record.dart';
 import '../providers/board_provider.dart';
 import '../services/date_keys.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 
 /// Board — SSOT 번역. 제목(편집)/날짜/N images/하트 + 3×3 셀 + 이미지 추가.
@@ -216,7 +217,7 @@ class _BoardScreenState extends State<BoardScreen> {
                 height: 24,
                 colorFilter: record.isFavorite
                     ? null // 자연색 #1C274C (즐겨찾기)
-                    : const ColorFilter.mode(AppColors.lineSoft, BlendMode.srcIn),
+                    : const ColorFilter.mode(AppColors.subText, BlendMode.srcIn),
               ),
             ),
           ],
@@ -253,15 +254,17 @@ class _BoardScreenState extends State<BoardScreen> {
     final path = record.cells[categoryId];
     return GestureDetector(
       onTap: () => _onCellTap(record, categoryId),
-      child: SizedBox(
+      child: Container(
         width: 111,
         height: 111,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        ),
         child: path != null
             ? Image.file(File(path), fit: BoxFit.cover)
-            : ColoredBox(
-                color: AppColors.card,
-                child: Center(child: Text(label, style: AppTextStyles.category)),
-              ),
+            : Center(child: Text(label, style: AppTextStyles.category)),
       ),
     );
   }
