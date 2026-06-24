@@ -44,6 +44,23 @@ class ProfileProvider extends ChangeNotifier {
   /// 로그아웃 — 프로필은 유지(다시 로그인 가능), 게이트만 인증 플로우로.
   Future<void> logout() => _setLoggedIn(false);
 
+  /// 가입된 아이디(찾기 화면 표시용). 없으면 null.
+  String? get registeredUserId => _profile?.userId;
+
+  /// 패스워드 재설정(경로 A 로컬) — 해시는 단방향이라 복구 불가, 새로 지정.
+  /// 성공이면 null, 실패면 사유 문자열.
+  Future<String?> resetPassword(String newPassword) async {
+    final p = _profile ?? await _repo.loadProfile();
+    if (p == null) return '가입된 계정이 없어요.';
+    final e = validatePassword(newPassword);
+    if (e != null) return e;
+    p.password = hashPassword(newPassword);
+    await _repo.saveProfile(p);
+    _profile = p;
+    notifyListeners();
+    return null;
+  }
+
   /// 프로필 생성/갱신 후 즉시 저장.
   Future<void> saveProfile(UserProfile profile) async {
     _profile = profile;

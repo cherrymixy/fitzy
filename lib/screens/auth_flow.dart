@@ -23,6 +23,7 @@ enum _Step {
   suTags,
   suImage,
   login,
+  recover,
 }
 
 class AuthFlow extends StatefulWidget {
@@ -41,6 +42,7 @@ class _AuthFlowState extends State<AuthFlow> {
   final _tags = TextEditingController();
   final _loginId = TextEditingController();
   final _loginPw = TextEditingController();
+  final _newPw = TextEditingController();
 
   bool _agreedTerms = false;
   String? _gender; // 'boy' | 'girl'
@@ -57,6 +59,7 @@ class _AuthFlowState extends State<AuthFlow> {
     _tags.dispose();
     _loginId.dispose();
     _loginPw.dispose();
+    _newPw.dispose();
     super.dispose();
   }
 
@@ -81,6 +84,7 @@ class _AuthFlowState extends State<AuthFlow> {
       _Step.suTags: _Step.suGender,
       _Step.suImage: _Step.suTags,
       _Step.login: _Step.start,
+      _Step.recover: _Step.login,
     };
     final p = prev[_step];
     if (p != null) _go(p, forward: false);
@@ -176,6 +180,7 @@ class _AuthFlowState extends State<AuthFlow> {
       case _Step.login:
         _doLogin();
       case _Step.start:
+      case _Step.recover:
         break;
     }
   }
@@ -223,6 +228,7 @@ class _AuthFlowState extends State<AuthFlow> {
         _Step.suTags => _suTags(),
         _Step.suImage => _suImage(),
         _Step.login => _login(),
+        _Step.recover => _recover(),
           },
         ),
       ),
@@ -718,18 +724,67 @@ class _AuthFlowState extends State<AuthFlow> {
           left: 0,
           right: 0,
           top: 801,
-          child: Text(
-            'ID/패스워드를 까먹으셨나요?',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              decoration: TextDecoration.underline,
-              color: AppColors.text,
+          child: GestureDetector(
+            onTap: () => _go(_Step.recover),
+            child: const Text(
+              'ID/패스워드를 까먹으셨나요?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                decoration: TextDecoration.underline,
+                color: AppColors.text,
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _doReset() async {
+    final err =
+        await context.read<ProfileProvider>().resetPassword(_newPw.text);
+    if (!mounted) return;
+    if (err != null) {
+      _toast(err);
+      return;
+    }
+    _toast('패스워드를 변경했어요. 새 패스워드로 로그인해 주세요.');
+    _newPw.clear();
+    _go(_Step.login, forward: false);
+  }
+
+  Widget _recover() {
+    final id = context.read<ProfileProvider>().registeredUserId;
+    return _formScaffold(
+      '계정을 잊으셨나요?',
+      '가입된 아이디를 확인하고 패스워드를 새로 정할 수 있어요.',
+      [
+        Container(
+          width: double.infinity,
+          height: 52,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.coin,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            id == null ? '가입된 계정이 없어요.' : '가입된 아이디 · $id',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: id == null ? AppColors.graySubtle : AppColors.grayBold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _field(_newPw, '새 패스워드 (영문, 특수문자, 숫자 조합)', obscure: true),
+      ],
+      '패스워드 재설정',
+      _doReset,
+      dark: true,
     );
   }
 }

@@ -99,4 +99,26 @@ void main() {
     expect(await provider.login('cherry', 'pw123456'), isNull);
     expect(provider.loggedIn, isTrue);
   });
+
+  test('패스워드 재설정: 옛 비번 실패, 새 비번 로그인', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final prefs = await SharedPreferences.getInstance();
+    final provider = ProfileProvider(StorageService(prefs));
+    await provider.load();
+    await provider.createProfile(
+      userId: 'cherry',
+      password: 'old123456',
+      nickname: '체리',
+      gender: 'girl',
+    );
+
+    expect(provider.registeredUserId, 'cherry');
+    expect(await provider.resetPassword('123'), isNotNull); // 너무 짧음
+    expect(await provider.resetPassword('new567890'), isNull);
+
+    await provider.logout();
+    expect(await provider.login('cherry', 'old123456'), isNotNull);
+    expect(await provider.login('cherry', 'new567890'), isNull);
+    expect(provider.loggedIn, isTrue);
+  });
 }
