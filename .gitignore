@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Claude Code (로컬 전용: 시뮬레이터 자동 갱신 훅 — 기기별 UDID 포함)
+.claude/settings.local.json
+.claude/hooks/
