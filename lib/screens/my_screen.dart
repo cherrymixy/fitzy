@@ -107,15 +107,31 @@ class MyScreen extends StatelessWidget {
     return Container(
       width: 171,
       height: 171,
-      decoration: BoxDecoration(
+      clipBehavior: Clip.antiAlias,
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.card,
-        image: profile.profileImagePath != null
-            ? DecorationImage(
-                image: FileImage(File(profile.profileImagePath!)),
-                fit: BoxFit.cover,
-              )
-            : null,
+      ),
+      child: profile.profileImagePath != null
+          ? Image.file(
+              File(profile.profileImagePath!),
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _avatarFallback(),
+            )
+          : _avatarFallback(),
+    );
+  }
+
+  Widget _avatarFallback() {
+    return Center(
+      child: SvgPicture.asset(
+        'assets/images/icons/user.svg',
+        width: 64,
+        height: 64,
+        colorFilter: const ColorFilter.mode(
+          AppColors.lineSoft,
+          BlendMode.srcIn,
+        ),
       ),
     );
   }
