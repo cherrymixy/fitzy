@@ -71,4 +71,32 @@ void main() {
     expect(loaded.nickname, '승아');
     expect(loaded.gender, 'girl');
   });
+
+  test('패스워드 해시 저장 + 로그인/로그아웃', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final prefs = await SharedPreferences.getInstance();
+    final repo = StorageService(prefs);
+    final provider = ProfileProvider(repo);
+    await provider.load();
+
+    await provider.createProfile(
+      userId: 'cherry',
+      password: 'pw123456',
+      nickname: '체리',
+      gender: 'girl',
+    );
+
+    // 저장된 패스워드는 평문이 아니라 해시
+    final stored = await repo.loadProfile();
+    expect(stored!.password, isNot('pw123456'));
+    expect(stored.password, ProfileProvider.hashPassword('pw123456'));
+
+    // 로그아웃 → 로그인 round-trip
+    await provider.logout();
+    expect(provider.loggedIn, isFalse);
+    expect(await provider.login('cherry', 'wrong-pw'), isNotNull);
+    expect(provider.loggedIn, isFalse);
+    expect(await provider.login('cherry', 'pw123456'), isNull);
+    expect(provider.loggedIn, isTrue);
+  });
 }

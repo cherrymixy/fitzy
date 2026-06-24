@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/user_profile.dart';
@@ -68,6 +71,10 @@ class ProfileProvider extends ChangeNotifier {
     return null;
   }
 
+  /// 패스워드 해시(로컬 저장용). 평문 대신 sha256 해시를 저장/대조한다.
+  static String hashPassword(String pw) =>
+      sha256.convert(utf8.encode('fitzy.salt:$pw')).toString();
+
   /// 가입: 형식검증 → 아이디 중복검사 → 저장.
   /// 성공이면 null, 실패면 사유 문자열(회색박스 UI가 표시).
   Future<String?> createProfile({
@@ -96,7 +103,7 @@ class ProfileProvider extends ChangeNotifier {
 
     await saveProfile(UserProfile(
       userId: userId,
-      password: password,
+      password: hashPassword(password),
       nickname: nickname.trim(),
       gender: gender,
       genderPrivate: genderPrivate,
@@ -115,7 +122,9 @@ class ProfileProvider extends ChangeNotifier {
   Future<String?> login(String userId, String password) async {
     final p = await _repo.loadProfile();
     if (p == null || p.userId != userId) return '가입된 계정이 없어요.';
-    if (p.password != password) return '아이디 또는 패스워드가 맞지 않아요.';
+    if (p.password != hashPassword(password)) {
+      return '아이디 또는 패스워드가 맞지 않아요.';
+    }
     _profile = p;
     await _setLoggedIn(true);
     return null;
