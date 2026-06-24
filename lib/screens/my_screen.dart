@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +7,7 @@ import '../providers/profile_provider.dart';
 import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../widgets/local_image.dart';
 
 /// My — SSOT 번역. 프로필 원/편집 버튼/닉네임·메타/태그/구분선/메뉴 리스트.
 /// 절대좌표는 SSOT(393×852, 풀프레임) 기준. 데이터는 ProfileProvider.
@@ -114,11 +113,11 @@ class MyScreen extends StatelessWidget {
         color: AppColors.card,
       ),
       child: profile.profileImagePath != null
-          ? Image.file(
-              File(context.read<ImageStoreService>()
-                  .resolve(profile.profileImagePath!)),
+          ? localImage(
+              context.read<ImageStoreService>()
+                  .resolve(profile.profileImagePath!),
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => _avatarFallback(),
+              error: _avatarFallback(),
             )
           : _avatarFallback(),
     );

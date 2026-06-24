@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,6 +13,7 @@ import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
+import '../widgets/local_image.dart';
 
 /// Board — SSOT 번역. 제목(편집)/날짜/N images/하트 + 3×3 셀 + 이미지 추가.
 /// 절대좌표는 SSOT(393×852, 풀프레임) 기준. 셀/제목/하트 로직 불변.
@@ -304,13 +303,13 @@ class _BoardScreenState extends State<BoardScreen> {
             ? _PopIn(
                 animate:
                     !(MediaQuery.maybeOf(context)?.disableAnimations ?? false),
-                child: Image.file(
-                  File(context.read<ImageStoreService>().resolve(path)),
+                child: localImage(
+                  context.read<ImageStoreService>().resolve(path),
                   width: size,
                   height: size,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) =>
-                      Center(child: Text(label, style: AppTextStyles.category)),
+                  error: Center(
+                    child: Text(label, style: AppTextStyles.category),
+                  ),
                 ),
               )
             : Center(child: Text(label, style: AppTextStyles.category)),

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +9,7 @@ import '../services/date_keys.dart';
 import '../services/image_store_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../widgets/local_image.dart';
 import 'board_screen.dart';
 
 /// Calendar — SSOT 번역. 월 헤더 + 요일 + 날짜 그리드(기록일=썸네일) + 월 통계.
@@ -229,12 +228,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: thumb != null
-                        ? Image.file(
-                            File(context.read<ImageStoreService>().resolve(thumb)),
+                        ? localImage(
+                            context.read<ImageStoreService>().resolve(thumb),
                             width: 37,
                             height: 37,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => const SizedBox(
+                            error: const SizedBox(
                               width: 37,
                               height: 37,
                               child: ColoredBox(color: AppColors.thumbPlaceholder),
