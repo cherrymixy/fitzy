@@ -9,7 +9,11 @@ class AppTheme {
   const AppTheme._();
 
   static ThemeData get light {
-    final base = ThemeData(useMaterial3: true);
+    final base = ThemeData(
+      useMaterial3: true,
+      fontFamily: AppTextStyles.fontFamily, // Pretendard 기본 적용
+      fontFamilyFallback: const ['Apple SD Gothic Neo'], // 한글 폴백
+    );
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: ColorScheme.fromSeed(seedColor: AppColors.accent).copyWith(
