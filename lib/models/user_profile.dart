@@ -1,8 +1,9 @@
 /// 사용자 프로필 (경로 A 로컬).
-///
-/// 아이디(@) 필드는 없음 — 로컬 전용 경로 A에서는 전역 유니크를 보장할 수
-/// 없으므로 제거했다. 식별/표시는 닉네임으로 한다.
 class UserProfile {
+  /// 내부 식별 아이디(불변). 경로 A에서는 전역 유니크를 보장하지 않고
+  /// 형식검증 + 로컬 대조만 한다(전역 유니크는 경로 B에서). [[ID 유니크 추상화]]
+  final String userId;
+
   /// 표시 닉네임(편집 가능).
   String nickname;
 
@@ -20,6 +21,7 @@ class UserProfile {
   String? profileImagePath;
 
   UserProfile({
+    required this.userId,
     required this.nickname,
     required this.gender,
     this.genderPrivate = false,

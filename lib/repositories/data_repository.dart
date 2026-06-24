@@ -12,6 +12,10 @@ abstract class DataRepository {
   Future<UserProfile?> loadProfile();
   Future<void> saveProfile(UserProfile profile);
 
+  /// 아이디 중복 여부.
+  /// [A] 로컬 대조(전역 유니크 아님), [B] Firestore 전역 유니크.
+  Future<bool> isUserIdTaken(String userId);
+
   // --- Coin ---
   /// 없으면 기본값 const CoinState() 반환(미지급 상태).
   Future<CoinState> loadCoinState();

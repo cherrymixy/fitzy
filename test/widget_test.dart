@@ -1,4 +1,4 @@
-// 스캐폴드 스모크 테스트: 프로바이더 배선과 함께 셸이 떠서 "FITZY"가 보이는지.
+// 게이트 스모크: 프로필이 없으면 첫 실행에 온보딩이 뜬다.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,7 +7,7 @@ import 'package:fitzy/services/image_store_service.dart';
 import 'package:fitzy/services/storage_service.dart';
 
 void main() {
-  testWidgets('FITZY 워드마크가 렌더된다', (WidgetTester tester) async {
+  testWidgets('첫 실행: 프로필 없으면 온보딩이 뜬다', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final prefs = await SharedPreferences.getInstance();
 
@@ -17,7 +17,9 @@ void main() {
         imageStore: ImageStoreService(),
       ),
     );
+    await tester.pump(); // ProfileProvider.load() 완료
+    await tester.pump(); // 온보딩으로 리빌드
 
-    expect(find.text('FITZY'), findsOneWidget);
+    expect(find.text('다음'), findsOneWidget); // 온보딩 첫 페이지 CTA
   });
 }

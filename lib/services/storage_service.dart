@@ -34,6 +34,14 @@ class StorageService implements DataRepository {
     await _prefs.setString(_kProfile, jsonEncode(_profileToMap(profile)));
   }
 
+  /// 경로 A 로컬 대조: 저장된 프로필과 동일 아이디면 사용 중으로 본다.
+  /// 단일 기기·단일 프로필이라 전역 유니크는 아니다(경로 B에서 보장).
+  @override
+  Future<bool> isUserIdTaken(String userId) async {
+    final profile = await loadProfile();
+    return profile?.userId == userId;
+  }
+
   // --- Coin ---
   @override
   Future<CoinState> loadCoinState() async {
@@ -89,6 +97,7 @@ class StorageService implements DataRepository {
 
   // --- (역)직렬화 ---
   Map<String, dynamic> _profileToMap(UserProfile p) => <String, dynamic>{
+        'userId': p.userId,
         'nickname': p.nickname,
         'gender': p.gender,
         'genderPrivate': p.genderPrivate,
@@ -97,6 +106,7 @@ class StorageService implements DataRepository {
       };
 
   UserProfile _profileFromMap(Map<String, dynamic> m) => UserProfile(
+        userId: m['userId'] as String,
         nickname: m['nickname'] as String,
         gender: m['gender'] as String,
         genderPrivate: m['genderPrivate'] as bool? ?? false,

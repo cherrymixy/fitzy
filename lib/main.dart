@@ -6,6 +6,7 @@ import 'providers/board_provider.dart';
 import 'providers/coin_provider.dart';
 import 'providers/profile_provider.dart';
 import 'repositories/data_repository.dart';
+import 'screens/root_gate.dart';
 import 'services/image_store_service.dart';
 import 'services/storage_service.dart';
 
@@ -20,7 +21,7 @@ Future<void> main() async {
   runApp(FitzyApp(repository: repository, imageStore: imageStore));
 }
 
-/// STEP 3: 데이터 계층(Repository)·상태(Provider) 배선. 화면은 아직 빈 셸.
+/// STEP 4: 데이터·상태 배선 + 첫 실행 게이트(온보딩/가입 ↔ 메인).
 class FitzyApp extends StatelessWidget {
   const FitzyApp({
     super.key,
@@ -48,11 +49,7 @@ class FitzyApp extends StatelessWidget {
       child: const MaterialApp(
         title: 'FITZY',
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Center(
-            child: Text('FITZY'),
-          ),
-        ),
+        home: RootGate(),
       ),
     );
   }
