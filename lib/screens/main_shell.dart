@@ -21,13 +21,6 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _index = 0;
 
-  static const List<Widget> _tabs = [
-    SelectScreen(),
-    BoardScreen(),
-    CalendarScreen(),
-    MyScreen(),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -55,7 +48,15 @@ class _MainShellState extends State<MainShell> {
           ),
         ],
       ),
-      body: IndexedStack(index: _index, children: _tabs),
+      body: IndexedStack(
+        index: _index,
+        children: [
+          SelectScreen(onDrawn: () => _select(1)),
+          const BoardScreen(),
+          const CalendarScreen(),
+          const MyScreen(),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: _select,
