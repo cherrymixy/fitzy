@@ -42,22 +42,22 @@ class SelectScreen extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Pick Your Fit (top 154 - 54)
+        // Pick Your Fit (SSOT top 154)
         const Positioned(
           left: 20,
-          top: 100,
+          top: 154,
           child: Text('Pick Your Fit', style: AppTextStyles.eyebrow),
         ),
-        // 자판기 (top 177 - 54)
+        // 자판기 (SSOT top 177)
         Positioned(
           left: 20,
-          top: 123,
+          top: 177,
           child: _machine(context, gender),
         ),
-        // 컨트롤 패널 (top 344 - 54)
+        // 컨트롤 패널 (SSOT top 344)
         const Positioned(
           left: 300,
-          top: 290,
+          top: 344,
           child: _ControlPanel(),
         ),
       ],

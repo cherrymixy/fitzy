@@ -11,8 +11,9 @@ import 'calendar_screen.dart';
 import 'my_screen.dart';
 import 'select_screen.dart';
 
-/// 로그인 후 공통 셸 (SSOT shell): 상단 좌측 로고 + 우측 코인 칩, 하단 떠 있는 네비.
-/// 진입 시 코인 일일 지급(refreshDaily)·과거 보드 마감(finalizePastRecords).
+/// 로그인 후 공통 셸 (SSOT shell). 풀프레임 절대좌표(상태바/홈인디케이터 포함)로
+/// 매핑 — SafeArea로 감싸지 않는다(감싸면 하단 인셋이 이중 계산돼 네비가 떠오름).
+/// 헤더 top 70 / 네비 bottom 33 = SSOT 원좌표. 진입 시 refreshDaily·finalize.
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -39,38 +40,36 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: IndexedStack(
-                index: _index,
-                children: [
-                  SelectScreen(onDrawn: () => _select(1)),
-                  const BoardScreen(),
-                  const CalendarScreen(),
-                  const MyScreen(),
-                ],
-              ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: IndexedStack(
+              index: _index,
+              children: [
+                SelectScreen(onDrawn: () => _select(1)),
+                const BoardScreen(),
+                const CalendarScreen(),
+                const MyScreen(),
+              ],
             ),
-            // 공통 헤더 (SSOT logo top 70 - 상태바 54 = 16)
-            const Positioned(
-              top: 16,
-              left: 20,
-              right: 20,
-              child: FitzyHeader(),
+          ),
+          // 공통 헤더 (SSOT logo top 70 / coin top 72)
+          const Positioned(
+            top: 70,
+            left: 20,
+            right: 20,
+            child: FitzyHeader(),
+          ),
+          // 떠 있는 네비 (SSOT bottom 33)
+          Positioned(
+            bottom: 33,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: FloatingNav(currentIndex: _index, onTap: _select),
             ),
-            // 떠 있는 네비 (SSOT bottom 33)
-            Positioned(
-              bottom: 33,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: FloatingNav(currentIndex: _index, onTap: _select),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
