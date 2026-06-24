@@ -233,6 +233,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             width: 37,
                             height: 37,
                             fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => const SizedBox(
+                              width: 37,
+                              height: 37,
+                              child: ColoredBox(color: AppColors.thumbPlaceholder),
+                            ),
                           )
                         : const ColoredBox(
                             color: AppColors.thumbPlaceholder,
