@@ -20,6 +20,7 @@ class StorageService implements DataRepository {
   static const String _kProfile = 'fitzy.profile';
   static const String _kCoin = 'fitzy.coin';
   static const String _kRecords = 'fitzy.records'; // { dateKey: recordMap }
+  static const String _kLoggedIn = 'fitzy.loggedIn';
 
   // --- Profile ---
   @override
@@ -40,6 +41,14 @@ class StorageService implements DataRepository {
   Future<bool> isUserIdTaken(String userId) async {
     final profile = await loadProfile();
     return profile?.userId == userId;
+  }
+
+  @override
+  Future<bool?> loadLoggedIn() async => _prefs.getBool(_kLoggedIn);
+
+  @override
+  Future<void> saveLoggedIn(bool value) async {
+    await _prefs.setBool(_kLoggedIn, value);
   }
 
   // --- Coin ---

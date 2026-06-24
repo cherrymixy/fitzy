@@ -96,6 +96,8 @@ class MyScreen extends StatelessWidget {
               _menuRow(context, '공지사항'),
               const SizedBox(height: 21),
               _menuRow(context, '고객센터'),
+              const SizedBox(height: 21),
+              _logoutRow(context),
             ],
           ),
         ),
@@ -194,5 +196,44 @@ class MyScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _logoutRow(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _confirmLogout(context),
+      child: SizedBox(
+        height: 27,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            '로그아웃',
+            style: AppTextStyles.menuRow.copyWith(color: AppColors.subText),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final provider = context.read<ProfileProvider>();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('로그아웃'),
+        content: const Text('로그아웃할까요? 기록은 기기에 그대로 남아요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('로그아웃'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await provider.logout();
   }
 }

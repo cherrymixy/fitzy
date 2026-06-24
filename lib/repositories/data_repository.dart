@@ -16,6 +16,10 @@ abstract class DataRepository {
   /// [A] 로컬 대조(전역 유니크 아님), [B] Firestore 전역 유니크.
   Future<bool> isUserIdTaken(String userId);
 
+  /// 로그인 상태(없으면 null — 레거시 프로필은 자동 로그인 처리).
+  Future<bool?> loadLoggedIn();
+  Future<void> saveLoggedIn(bool value);
+
   // --- Coin ---
   /// 없으면 기본값 const CoinState() 반환(미지급 상태).
   Future<CoinState> loadCoinState();

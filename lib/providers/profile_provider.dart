@@ -20,11 +20,26 @@ class ProfileProvider extends ChangeNotifier {
   bool _loaded = false;
   bool get loaded => _loaded;
 
+  /// 로그인 상태(게이트는 이 값으로 메인/인증 플로우를 분기).
+  bool _loggedIn = false;
+  bool get loggedIn => _loggedIn;
+
   Future<void> load() async {
     _profile = await _repo.loadProfile();
+    // 플래그 없으면(레거시) 프로필 존재 = 로그인 상태로 자동 처리.
+    _loggedIn = (await _repo.loadLoggedIn()) ?? (_profile != null);
     _loaded = true;
     notifyListeners();
   }
+
+  Future<void> _setLoggedIn(bool value) async {
+    _loggedIn = value;
+    await _repo.saveLoggedIn(value);
+    notifyListeners();
+  }
+
+  /// 로그아웃 — 프로필은 유지(다시 로그인 가능), 게이트만 인증 플로우로.
+  Future<void> logout() => _setLoggedIn(false);
 
   /// 프로필 생성/갱신 후 즉시 저장.
   Future<void> saveProfile(UserProfile profile) async {
@@ -88,6 +103,7 @@ class ProfileProvider extends ChangeNotifier {
       tags: tags,
       profileImagePath: profileImagePath,
     ));
+    await _setLoggedIn(true);
     return null;
   }
 
@@ -101,7 +117,7 @@ class ProfileProvider extends ChangeNotifier {
     if (p == null || p.userId != userId) return '가입된 계정이 없어요.';
     if (p.password != password) return '아이디 또는 패스워드가 맞지 않아요.';
     _profile = p;
-    notifyListeners();
+    await _setLoggedIn(true);
     return null;
   }
 }
