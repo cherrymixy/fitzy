@@ -32,6 +32,16 @@
 
 ---
 
+## 🌐 체험하기
+
+| 웹 — 설치 없이 바로 | 안드로이드 APK |
+|---|---|
+| **👉 [cherrymixy.github.io/fitzy](https://cherrymixy.github.io/fitzy/)** | [📦 Releases](https://github.com/cherrymixy/fitzy/releases)에서 다운로드 |
+
+> 웹은 데모용(이미지는 새로고침 시 사라짐, 카메라 제한). 온전한 경험은 모바일(APK 설치 / iOS 시뮬레이터).
+
+---
+
 ## ✨ 핵심 루프
 
 ```
