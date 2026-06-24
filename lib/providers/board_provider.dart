@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
+import '../data/board_categories.dart';
+import '../data/mood_fits.dart';
 import '../models/day_record.dart';
 import '../repositories/data_repository.dart';
+import '../services/date_keys.dart';
 import '../services/image_store_service.dart';
 
 /// 보드(DayRecord) 상태. 변경 시 즉시 저장.
@@ -36,6 +39,25 @@ class BoardProvider extends ChangeNotifier {
     _records[record.dateKey] = record;
     await _repo.saveDayRecord(record);
     notifyListeners();
+  }
+
+  /// 뽑기 직후 오늘 무드 보드 생성. 이미 오늘 보드가 있으면 무시(덮어쓰기 X).
+  /// 제목 기본값=무드명, cells는 9칸 빈칸으로 초기화.
+  Future<void> createTodayRecord(String moodFitId, DateTime now) async {
+    final dateKey = dateKeyOf(now);
+    if (_records.containsKey(dateKey)) return;
+    final mood = kMoodFits.firstWhere((m) => m.id == moodFitId);
+    final cells = <String, String?>{
+      for (final category in kBoardCategories) category.id: null,
+    };
+    await upsert(DayRecord(
+      dateKey: dateKey,
+      moodFitId: moodFitId,
+      moodTitle: mood.nameKo,
+      cells: cells,
+      createdAt: now,
+      updatedAt: now,
+    ));
   }
 
   /// 레코드와 그에 속한 이미지 파일까지 삭제.
