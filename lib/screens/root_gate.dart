@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/profile_provider.dart';
-import 'main_placeholder.dart';
+import 'main_shell.dart';
 import 'onboarding_screen.dart';
 
 /// 첫/재실행 분기.
@@ -19,7 +19,7 @@ class RootGate extends StatelessWidget {
       return const Scaffold(body: Center(child: Text('…')));
     }
     return profile.hasProfile
-        ? const MainPlaceholder()
+        ? const MainShell()
         : const OnboardingScreen();
   }
 }

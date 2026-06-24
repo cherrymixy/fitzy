@@ -30,7 +30,14 @@ class BoardProvider extends ChangeNotifier {
   List<DayRecord> get completedRecords =>
       _records.values.where((r) => r.isComplete).toList();
 
-  Future<void> load() async {
+  Future<void>? _loading;
+
+  /// 멱등 로드: 여러 번 불러도 최초 1회만 실행.
+  /// 진입 시 finalizePastRecords/createTodayRecord가 load 완료를 await하게 해
+  /// stale 덮어쓰기(경쟁)를 막는다.
+  Future<void> load() => _loading ??= _load();
+
+  Future<void> _load() async {
     final list = await _repo.loadAllDayRecords();
     _records
       ..clear()
@@ -48,6 +55,7 @@ class BoardProvider extends ChangeNotifier {
   /// 뽑기 직후 오늘 무드 보드 생성. 이미 오늘 보드가 있으면 무시(덮어쓰기 X).
   /// 제목 기본값=무드명, cells는 9칸 빈칸으로 초기화.
   Future<void> createTodayRecord(String moodFitId, DateTime now) async {
+    await load(); // 로드 완료 보장(경쟁 방지)
     final dateKey = dateKeyOf(now);
     if (_records.containsKey(dateKey)) return;
     final mood = kMoodFits.firstWhere((m) => m.id == moodFitId);
@@ -132,6 +140,7 @@ class BoardProvider extends ChangeNotifier {
   /// 마감되면 이미지 추가/수정 불가(제목·즐겨찾기는 계속 허용).
   /// 진입 시 호출(now 주입). 화면 배선은 STEP 7.
   Future<void> finalizePastRecords(DateTime now) async {
+    await load(); // 로드 완료 보장(경쟁 방지)
     final today = dateKeyOf(now);
     var changed = false;
     for (final record in _records.values) {

@@ -16,7 +16,13 @@ class CoinProvider extends ChangeNotifier {
   CoinState _coin = const CoinState();
   CoinState get coin => _coin;
 
-  Future<void> load() async {
+  Future<void>? _loading;
+
+  /// 멱등 로드: 여러 번 불러도 최초 1회만 실행.
+  /// 진입 시 refreshDaily가 load 완료를 await하게 해 stale 덮어쓰기(경쟁)를 막는다.
+  Future<void> load() => _loading ??= _load();
+
+  Future<void> _load() async {
     _coin = await _repo.loadCoinState();
     notifyListeners();
   }
@@ -31,6 +37,7 @@ class CoinProvider extends ChangeNotifier {
   /// 진입 시 일일 지급. 오늘 dateKey가 마지막 지급일과 다르면 코인 1 지급하고
   /// drawnToday 리셋. 같은 날이면 변화 없음(추가 지급 X, 이월 X).
   Future<void> refreshDaily(DateTime now) async {
+    await load(); // 로드 완료 보장(경쟁 시 stale 덮어쓰기 방지)
     final today = dateKeyOf(now);
     if (_coin.lastGrantedDateKey == today) return; // 같은 날 → 변화 없음
     await setCoinState(CoinState(
