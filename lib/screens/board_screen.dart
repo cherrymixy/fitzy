@@ -264,16 +264,24 @@ class _BoardScreenState extends State<BoardScreen> {
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         child: path != null
-            ? Image.file(
-                File(context.read<ImageStoreService>().resolve(path)),
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
-                    Center(child: Text(label, style: AppTextStyles.category)),
+            ? _PopIn(
+                animate:
+                    !(MediaQuery.maybeOf(context)?.disableAnimations ?? false),
+                child: Image.file(
+                  File(context.read<ImageStoreService>().resolve(path)),
+                  width: 111,
+                  height: 111,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) =>
+                      Center(child: Text(label, style: AppTextStyles.category)),
+                ),
               )
             : Center(child: Text(label, style: AppTextStyles.category)),
       ),
     );
   }
+
+  // (연출은 파일 하단 _PopIn 위젯 참고)
 
   Widget _addButton(DayRecord record) {
     return GestureDetector(
@@ -292,3 +300,25 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 }
+
+/// 셀 이미지 등장 연출: 0.85→1.0 스케일 팝 (250ms, Curves.easeOutBack).
+/// 모션 줄이기(disableAnimations)면 애니메이션 없이 즉시 표시.
+class _PopIn extends StatelessWidget {
+  const _PopIn({required this.child, required this.animate});
+
+  final Widget child;
+  final bool animate;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!animate) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.85, end: 1.0),
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutBack,
+      child: child,
+      builder: (_, value, c) => Transform.scale(scale: value, child: c),
+    );
+  }
+}
+
