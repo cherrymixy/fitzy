@@ -29,6 +29,17 @@ class SelectScreen extends StatelessWidget {
     final ok = await coin.consumeForDraw();
     if (!ok) return;
     await board.createTodayRecord(moodId, now);
+    if (context.mounted) {
+      final name = kMoodFits.firstWhere((m) => m.id == moodId).nameKo;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text("오늘의 추구미는 '$name' ✨ 9칸을 채워보세요"),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+    }
     onDrawn();
   }
 

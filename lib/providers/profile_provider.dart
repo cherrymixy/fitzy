@@ -70,11 +70,13 @@ class ProfileProvider extends ChangeNotifier {
     return null;
   }
 
-  /// 프로필 편집(My) — 닉네임/태그/이미지 갱신. 성공 null, 실패 사유.
+  /// 프로필 편집(My) — 닉네임/성별/비공개/태그/이미지 갱신. 성공 null, 실패 사유.
   Future<String?> updateProfile({
     required String nickname,
     List<String>? tags,
     String? profileImagePath,
+    String? gender,
+    bool? genderPrivate,
   }) async {
     final p = _profile;
     if (p == null) return '프로필이 없어요.';
@@ -83,6 +85,8 @@ class ProfileProvider extends ChangeNotifier {
     p.nickname = nickname.trim();
     if (tags != null) p.tags = tags;
     if (profileImagePath != null) p.profileImagePath = profileImagePath;
+    if (gender != null) p.gender = gender;
+    if (genderPrivate != null) p.genderPrivate = genderPrivate;
     await saveProfile(p);
     return null;
   }

@@ -139,10 +139,14 @@ void main() {
     final err = await provider.updateProfile(
       nickname: '체리2',
       tags: const ['미니멀', '시크'],
+      gender: 'boy',
+      genderPrivate: true,
     );
     expect(err, isNull);
     expect(provider.profile!.nickname, '체리2');
     expect(provider.profile!.tags, ['미니멀', '시크']);
+    expect(provider.profile!.gender, 'boy');
+    expect(provider.profile!.genderPrivate, isTrue);
 
     // 영속 확인
     final reloaded = await StorageService(prefs).loadProfile();

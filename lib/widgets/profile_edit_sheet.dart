@@ -33,6 +33,8 @@ class _ProfileEditSheetState extends State<_ProfileEditSheet> {
   late final TextEditingController _nick;
   late final TextEditingController _tags;
   String? _imagePath;
+  late String _gender;
+  late bool _genderPrivate;
   bool _saving = false;
 
   @override
@@ -42,6 +44,8 @@ class _ProfileEditSheetState extends State<_ProfileEditSheet> {
     _nick = TextEditingController(text: p?.nickname ?? '');
     _tags = TextEditingController(text: (p?.tags ?? const <String>[]).join(', '));
     _imagePath = p?.profileImagePath;
+    _gender = p?.gender ?? 'girl';
+    _genderPrivate = p?.genderPrivate ?? false;
   }
 
   @override
@@ -72,6 +76,8 @@ class _ProfileEditSheetState extends State<_ProfileEditSheet> {
           nickname: _nick.text,
           tags: tags,
           profileImagePath: _imagePath,
+          gender: _gender,
+          genderPrivate: _genderPrivate,
         );
     if (!mounted) return;
     if (err != null) {
@@ -120,6 +126,28 @@ class _ProfileEditSheetState extends State<_ProfileEditSheet> {
           const SizedBox(height: 24),
           _label('닉네임'),
           _field(_nick, '닉네임', maxLen: 12),
+          const SizedBox(height: 16),
+          _label('성별'),
+          Row(
+            children: [
+              _genderChoice('남자', 'boy'),
+              const SizedBox(width: 7),
+              _genderChoice('여자', 'girl'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => setState(() => _genderPrivate = !_genderPrivate),
+            child: Row(
+              children: [
+                _checkBox(_genderPrivate),
+                const SizedBox(width: 8),
+                const Text('성별을 공개하고 싶지 않아요.',
+                    style: TextStyle(fontSize: 14, color: AppColors.grayBold)),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
           _label('태그'),
           _field(_tags, '쉼표로 구분 (러블리, 미니멀)'),
@@ -247,4 +275,43 @@ class _ProfileEditSheetState extends State<_ProfileEditSheet> {
       ),
     );
   }
+
+  Widget _genderChoice(String label, String value) {
+    final sel = _gender == value;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _gender = value),
+        child: Container(
+          height: 44,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: sel ? AppColors.text : AppColors.background,
+            border: Border.all(color: sel ? AppColors.text : AppColors.border),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: sel ? Colors.white : const Color(0xFF202020),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _checkBox(bool value) => Container(
+        width: 18,
+        height: 18,
+        decoration: BoxDecoration(
+          color: value ? AppColors.text : Colors.transparent,
+          border: Border.all(color: AppColors.graySubtle, width: 1.8),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: value
+            ? const Icon(Icons.check, size: 13, color: Colors.white)
+            : null,
+      );
 }
