@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,8 +54,53 @@ class FitzyApp extends StatelessWidget {
         title: 'FITZY',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
+        builder: _responsiveFrame,
         home: const RootGate(),
       ),
     );
   }
+}
+
+/// 넓은 웹 화면(데스크탑)에서는 폰 프레임(SSOT 393×852)으로 중앙 정렬 + 맞춤
+/// 스케일. 앱이 절대좌표 기반이라 전체 창에 펼치면 깨지므로 폰 캔버스 안에서
+/// 그대로 렌더하고 FittedBox로 창에 맞춘다. 모바일/네이티브는 그대로(변경 없음).
+Widget _responsiveFrame(BuildContext context, Widget? child) {
+  final mq = MediaQuery.of(context);
+  final content = child ?? const SizedBox.shrink();
+  if (!kIsWeb || mq.size.width <= 600) return content;
+
+  const fw = 393.0, fh = 852.0;
+  return ColoredBox(
+    color: const Color(0xFFE7E7EA),
+    child: Center(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Container(
+          width: fw,
+          height: fh,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 40,
+                offset: Offset(0, 14),
+              ),
+            ],
+          ),
+          child: MediaQuery(
+            data: mq.copyWith(
+              size: const Size(fw, fh),
+              padding: EdgeInsets.zero,
+              viewInsets: EdgeInsets.zero,
+              viewPadding: EdgeInsets.zero,
+            ),
+            child: content,
+          ),
+        ),
+      ),
+    ),
+  );
 }
