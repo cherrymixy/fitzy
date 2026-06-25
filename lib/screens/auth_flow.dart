@@ -263,11 +263,13 @@ class _AuthFlowState extends State<AuthFlow> {
         ),
       );
 
-  Widget _bottomBtn(String label, bool dark, VoidCallback onTap, {double top = 774}) {
+  // 화면 높이에 상관없이 바닥에 붙도록 '아래 기준' 고정(짧은 모바일에서 잘림 방지).
+  // SSOT의 top 기준값은 bottom = 852 - top - 44 로 환산.
+  Widget _bottomBtn(String label, bool dark, VoidCallback onTap, {double bottom = 34}) {
     return Positioned(
       left: 20,
       right: 20,
-      top: top,
+      bottom: bottom,
       child: GestureDetector(
         onTap: _submitting ? null : onTap,
         child: Container(
@@ -493,11 +495,11 @@ class _AuthFlowState extends State<AuthFlow> {
             child: SvgPicture.asset('assets/images/logo.svg', width: 189),
           ),
         ),
-        _bottomBtn('회원가입', false, () => _go(_Step.onb1), top: 726),
+        _bottomBtn('회원가입', false, () => _go(_Step.onb1), bottom: 82),
         Positioned(
           left: 0,
           right: 0,
-          top: 780,
+          bottom: 55,
           child: GestureDetector(
             onTap: () => _go(_Step.login),
             child: const Text(
@@ -546,7 +548,8 @@ class _AuthFlowState extends State<AuthFlow> {
         ),
         Positioned(
           left: 29,
-          top: 661,
+          right: 20,
+          bottom: 125,
           child: Text(
             title,
             style: const TextStyle(
@@ -747,11 +750,11 @@ class _AuthFlowState extends State<AuthFlow> {
             ],
           ),
         ),
-        _bottomBtn('로그인', true, _next, top: 747),
+        _bottomBtn('로그인', true, _next, bottom: 61),
         Positioned(
           left: 0,
           right: 0,
-          top: 801,
+          bottom: 34,
           child: GestureDetector(
             onTap: () => _go(_Step.recover),
             child: const Text(
