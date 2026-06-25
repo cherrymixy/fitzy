@@ -61,46 +61,49 @@ class FitzyApp extends StatelessWidget {
   }
 }
 
-/// 넓은 웹 화면(데스크탑)에서는 폰 프레임(SSOT 393×852)으로 중앙 정렬 + 맞춤
-/// 스케일. 앱이 절대좌표 기반이라 전체 창에 펼치면 깨지므로 폰 캔버스 안에서
-/// 그대로 렌더하고 FittedBox로 창에 맞춘다. 모바일/네이티브는 그대로(변경 없음).
+/// 웹에서 앱을 SSOT 폰 캔버스(393×852)에 고정하고 뷰포트에 맞춰 스케일(contain)한다.
+/// 앱이 절대좌표 기반이라, 캔버스보다 짧은 모바일 뷰포트(브라우저 툴바)나 넓은
+/// 데스크탑 창에 그대로 펼치면 아래가 잘리거나 좌상단에 몰린다. 캔버스째 스케일하면
+/// 항상 전체가 보인다.
+/// - 데스크탑(폭>600): 회색 배경 + 폰 프레임 룩(라운드/그림자)
+/// - 모바일 웹: 흰 배경(여백이 앱 배경과 같아 거의 안 보임) + 맞춤 스케일
+/// 네이티브(iOS/Android)는 변경 없음.
 Widget _responsiveFrame(BuildContext context, Widget? child) {
   final mq = MediaQuery.of(context);
   final content = child ?? const SizedBox.shrink();
-  if (!kIsWeb || mq.size.width <= 600) return content;
+  if (!kIsWeb) return content;
 
   const fw = 393.0, fh = 852.0;
-  return ColoredBox(
-    color: const Color(0xFFE7E7EA),
-    child: Center(
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Container(
-          width: fw,
-          height: fh,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x33000000),
-                blurRadius: 40,
-                offset: Offset(0, 14),
-              ),
-            ],
-          ),
-          child: MediaQuery(
-            data: mq.copyWith(
-              size: const Size(fw, fh),
-              padding: EdgeInsets.zero,
-              viewInsets: EdgeInsets.zero,
-              viewPadding: EdgeInsets.zero,
-            ),
-            child: content,
-          ),
-        ),
+  final wide = mq.size.width > 600;
+
+  final canvas = Container(
+    width: fw,
+    height: fh,
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: wide ? BorderRadius.circular(28) : BorderRadius.zero,
+      boxShadow: wide
+          ? const [
+              BoxShadow(color: Color(0x33000000), blurRadius: 40, offset: Offset(0, 14)),
+            ]
+          : null,
+    ),
+    child: MediaQuery(
+      data: mq.copyWith(
+        size: const Size(fw, fh),
+        padding: EdgeInsets.zero,
+        viewInsets: EdgeInsets.zero,
+        viewPadding: EdgeInsets.zero,
       ),
+      child: content,
+    ),
+  );
+
+  return ColoredBox(
+    color: wide ? const Color(0xFFE7E7EA) : Colors.white,
+    child: Center(
+      child: FittedBox(fit: BoxFit.contain, child: canvas),
     ),
   );
 }
